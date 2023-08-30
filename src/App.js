@@ -1,22 +1,6 @@
 import React from "react";
-
-function getWeatherIcon(wmoCode) {
-  const icons = new Map([
-    [[0], "☀️"],
-    [[1], "🌤"],
-    [[2], "⛅️"],
-    [[3], "☁️"],
-    [[45, 48], "🌫"],
-    [[51, 56, 61, 66, 80], "🌦"],
-    [[53, 55, 63, 65, 57, 67, 81, 82], "🌧"],
-    [[71, 73, 75, 77, 85, 86], "🌨"],
-    [[95], "🌩"],
-    [[96, 99], "⛈"],
-  ]);
-  const arr = [...icons.keys()].find((key) => key.includes(wmoCode));
-  if (!arr) return "NOT FOUND";
-  return icons.get(arr);
-}
+import Weather from "./Weather";
+import Input from "./Input";
 
 function convertToFlag(countryCode) {
   const codePoints = countryCode
@@ -26,25 +10,15 @@ function convertToFlag(countryCode) {
   return String.fromCodePoint(...codePoints);
 }
 
-function formatDay(dateStr) {
-  return new Intl.DateTimeFormat("en", {
-    weekday: "short",
-  }).format(new Date(dateStr));
-}
-
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      location: "Lisbon",
-      isLoading: false,
-      displayLocation: "",
-      weather: {},
-    };
-    this.fetchWeather = this.fetchWeather.bind(this);
-  }
+  state = {
+    location: "Lisbon",
+    isLoading: false,
+    displayLocation: "",
+    weather: {},
+  };
 
-  async fetchWeather() {
+  fetchWeather = async () => {
     try {
       this.setState({ isLoading: true });
       // 1) Getting location (geocoding)
@@ -74,23 +48,35 @@ class App extends React.Component {
     } finally {
       this.setState({ isLoading: false });
     }
-  }
+  };
+
+  setLocation = (e) => {
+    this.setState({ location: e.target.value });
+  };
 
   render() {
     return (
       <div className={"App"}>
         <h1>Classy Weather</h1>
         <div>
-          <input
-            type={"text"}
-            placeholder={"Search from location..."}
-            value={this.state.location}
-            onChange={(e) => this.setState({ location: e.target.value })}
-          />
+          {/*<input*/}
+          {/*  type={"text"}*/}
+          {/*  placeholder={"Search from location..."}*/}
+          {/*  value={this.state.location}*/}
+          {/*  onChange={(e) => this.setState({ location: e.target.value })}*/}
+          {/*/>*/}
+          <Input location={this.state.location} onChangeLocation={this.setLocation}></Input>
           <button onClick={this.fetchWeather}>Get weather</button>
         </div>
 
         {this.state.isLoading && <p className={"loader"}>Loading...</p>}
+
+        {this.state.weather.weathercode && (
+          <Weather
+            weather={this.state.weather}
+            location={this.state.displayLocation}
+          />
+        )}
       </div>
     );
   }
